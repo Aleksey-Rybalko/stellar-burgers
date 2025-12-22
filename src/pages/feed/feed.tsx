@@ -8,13 +8,15 @@ export const Feed: FC = () => {
   const dispatch = useDispatch();
 
   const orders = useSelector((state) => state.feed.orders);
+  const total = useSelector((state) => state.feed.total);
+  const totalToday = useSelector((state) => state.feed.totalToday);
   const loading = useSelector((state) => state.feed.loading);
 
   useEffect(() => {
     dispatch(fetchFeeds());
   }, [dispatch]);
 
-  if (loading) {
+  if (loading && orders.length === 0) {
     return <Preloader />;
   }
 

@@ -47,13 +47,17 @@ export const OrderCard: FC<OrderCardProps> = memo(({ order }) => {
     };
   }, [order, ingredients]);
 
-  if (!orderInfo) return null;
+  if (!orderInfo) {
+    return null;
+  }
+
+  const linkState = { background: location };
 
   return (
     <OrderCardUI
       orderInfo={orderInfo}
       maxIngredients={maxIngredients}
-      locationState={{ background: location }}
+      locationState={linkState}
     />
   );
 });

@@ -18,12 +18,16 @@ const constructorSlice = createSlice({
     addBun: (state, action: PayloadAction<TIngredient>) => {
       state.bun = action.payload;
     },
-    addIngredient: (state, action: PayloadAction<TIngredient>) => {
-      const ingredient: TConstructorIngredient = {
-        ...action.payload,
-        id: Date.now().toString()
-      };
-      state.ingredients.push(ingredient);
+    addIngredient: {
+      reducer: (state, action: PayloadAction<TConstructorIngredient>) => {
+        state.ingredients.push(action.payload);
+      },
+      prepare: (ingredient: TIngredient) => ({
+        payload: {
+          ...ingredient,
+          id: Date.now().toString() + Math.random().toString(36).substr(2, 9)
+        }
+      })
     },
     removeIngredient: (state, action: PayloadAction<string>) => {
       state.ingredients = state.ingredients.filter(
@@ -42,7 +46,6 @@ const constructorSlice = createSlice({
       state.bun = null;
       state.ingredients = [];
     },
-
     restoreConstructor: (state, action: PayloadAction<TConstructorState>) => {
       state.bun = action.payload.bun;
       state.ingredients = action.payload.ingredients.map((item) => ({

@@ -16,12 +16,17 @@ export const Login: FC = () => {
   const { user, error, isLoading } = useSelector((state) => state.user);
   const from = location.state?.from || '/';
 
+  // Очищаем ошибки при загрузке компонента
   useEffect(() => {
     dispatch(clearError());
   }, [dispatch]);
 
+  // Обработка успешного входа
   useEffect(() => {
     if (user) {
+      console.log('✅ Пользователь авторизован, обрабатываю редирект...');
+
+      // Восстанавливаем конструктор бургера из localStorage
       const savedConstructor = localStorage.getItem('burgerConstructor');
       if (savedConstructor) {
         try {
@@ -33,6 +38,47 @@ export const Login: FC = () => {
         localStorage.removeItem('burgerConstructor');
       }
 
+      // ✅ КРИТИЧЕСКОЕ ИСПРАВЛЕНИЕ: Восстанавливаем ПОЛНОЕ состояние из protectedRouteRedirect
+      const savedRedirect = sessionStorage.getItem('protectedRouteRedirect');
+
+      if (savedRedirect) {
+        try {
+          const redirectData = JSON.parse(savedRedirect);
+          console.log('🔄 Найден сохраненный редирект:', redirectData);
+          console.log('📦 Состояние для восстановления:', redirectData.state);
+
+          // Очищаем storage
+          sessionStorage.removeItem('protectedRouteRedirect');
+
+          // Если был background в state - сохраняем его отдельно для модалки
+          if (redirectData.state?.background) {
+            console.log('🎯 Обнаружен background, сохраняю для модалки');
+            sessionStorage.setItem(
+              'modalBackground',
+              JSON.stringify(redirectData.state.background)
+            );
+          }
+
+          // Редирект на исходный путь с ПОЛНЫМ восстановленным состоянием
+          console.log(
+            '🔄 Редирект на:',
+            redirectData.path,
+            'со state:',
+            redirectData.state
+          );
+          navigate(redirectData.path, {
+            replace: true,
+            state: redirectData.state // ← Восстанавливаем ВСЁ состояние
+          });
+          return;
+        } catch (e) {
+          console.error('❌ Ошибка восстановления редиректа:', e);
+          sessionStorage.removeItem('protectedRouteRedirect');
+        }
+      }
+
+      // Если нет сохраненного редиректа - обычный редирект
+      console.log('🔄 Обычный редирект на:', from);
       navigate(from, { replace: true });
     }
   }, [user, navigate, from, dispatch]);
@@ -40,6 +86,7 @@ export const Login: FC = () => {
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
 
+    // Простая валидация
     if (!email || !password) {
       return;
     }

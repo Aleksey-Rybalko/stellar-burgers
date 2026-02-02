@@ -1,7 +1,8 @@
 import { setCookie, getCookie } from './cookie';
 import { TIngredient, TOrder, TOrdersData, TUser } from './types';
 
-const URL = process.env.BURGER_API_URL;
+const URL =
+  process.env.BURGER_API_URL || 'https://norma.education-services.ru/api';
 
 const checkResponse = <T>(res: Response): Promise<T> =>
   res.ok ? res.json() : res.json().then((err) => Promise.reject(err));
@@ -87,37 +88,62 @@ export const getFeedsApi = () =>
       return Promise.reject(data);
     });
 
-export const getOrdersApi = () =>
-  fetchWithRefresh<TFeedsResponse>(`${URL}/orders`, {
+export const getOrdersApi = () => {
+  const token = getCookie('accessToken');
+  const authHeader = token ? `Bearer ${token}` : '';
+
+  return fetchWithRefresh<TFeedsResponse>(`${URL}/orders`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json;charset=utf-8',
-      authorization: getCookie('accessToken')
+      authorization: authHeader
     } as HeadersInit
   }).then((data) => {
     if (data?.success) return data.orders;
     return Promise.reject(data);
   });
+};
 
 type TNewOrderResponse = TServerResponse<{
-  order: TOrder;
+  order: {
+    number: number;
+  };
   name: string;
 }>;
 
-export const orderBurgerApi = (data: string[]) =>
-  fetchWithRefresh<TNewOrderResponse>(`${URL}/orders`, {
+export const orderBurgerApi = (ingredientIds: string[]) => {
+  const token = getCookie('accessToken');
+  const authHeader = token ? `Bearer ${token}` : '';
+  return fetchWithRefresh<TNewOrderResponse>(`${URL}/orders`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json;charset=utf-8',
-      authorization: getCookie('accessToken')
+      authorization: authHeader
     } as HeadersInit,
     body: JSON.stringify({
-      ingredients: data
+      ingredients: ingredientIds
     })
-  }).then((data) => {
-    if (data?.success) return data;
-    return Promise.reject(data);
-  });
+  })
+    .then((response) => {
+      if (response?.success) {
+        const order: TOrder = {
+          _id: `temp_${Date.now()}`,
+          status: 'created',
+          name: response.name,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          number: response.order.number,
+          ingredients: ingredientIds
+        };
+        return order;
+      }
+      return Promise.reject(response);
+    })
+    .catch((error) => {
+      console.error('Ошибка при создании заказа:', error);
+      throw error;
+    });
+};
 
 type TOrderResponse = TServerResponse<{
   orders: TOrder[];
@@ -206,22 +232,30 @@ export const resetPasswordApi = (data: { password: string; token: string }) =>
 
 type TUserResponse = TServerResponse<{ user: TUser }>;
 
-export const getUserApi = () =>
-  fetchWithRefresh<TUserResponse>(`${URL}/auth/user`, {
+export const getUserApi = () => {
+  const token = getCookie('accessToken');
+  const authHeader = token ? `Bearer ${token}` : '';
+
+  return fetchWithRefresh<TUserResponse>(`${URL}/auth/user`, {
     headers: {
-      authorization: getCookie('accessToken')
+      authorization: authHeader
     } as HeadersInit
   });
+};
 
-export const updateUserApi = (user: Partial<TRegisterData>) =>
-  fetchWithRefresh<TUserResponse>(`${URL}/auth/user`, {
+export const updateUserApi = (user: Partial<TRegisterData>) => {
+  const token = getCookie('accessToken');
+  const authHeader = token ? `Bearer ${token}` : '';
+
+  return fetchWithRefresh<TUserResponse>(`${URL}/auth/user`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json;charset=utf-8',
-      authorization: getCookie('accessToken')
+      authorization: authHeader
     } as HeadersInit,
     body: JSON.stringify(user)
   });
+};
 
 export const logoutApi = () =>
   fetch(`${URL}/auth/logout`, {

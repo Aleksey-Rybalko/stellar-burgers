@@ -11,10 +11,15 @@ describe('ingredientsSlice', () => {
     { _id: '2', name: 'Ингредиент 2', type: 'main', price: 200 }
   ];
 
+  it('должен возвращать начальное состояние', () => {
+    expect(ingredientsReducer(undefined, { type: 'unknown' })).toEqual(initialState);
+  });
+
   it('должен устанавливать loading в true при pending', () => {
     const action = { type: fetchIngredients.pending.type };
     const actual = ingredientsReducer(initialState, action);
     expect(actual.loading).toBe(true);
+    expect(actual.ingredients).toEqual([]);
   });
 
   it('должен сохранять данные и устанавливать loading в false при fulfilled', () => {
@@ -25,7 +30,7 @@ describe('ingredientsSlice', () => {
   });
 
   it('должен устанавливать loading в false при rejected', () => {
-    const action = { type: fetchIngredients.rejected.type, error: { message: 'Ошибка' } };
+    const action = { type: fetchIngredients.rejected.type };
     const actual = ingredientsReducer(initialState, action);
     expect(actual.loading).toBe(false);
     expect(actual.ingredients).toEqual([]);

@@ -1,9 +1,9 @@
-import userReducer, { 
-  checkUserAuth, 
-  loginUser, 
-  registerUser, 
+import userReducer, {
+  checkUserAuth,
+  loginUser,
+  registerUser,
   logoutUser,
-  clearError 
+  clearError
 } from '../userSlice';
 
 describe('userSlice', () => {
@@ -63,7 +63,10 @@ describe('userSlice', () => {
     });
 
     it('должен устанавливать ошибку при rejected', () => {
-      const action = { type: loginUser.rejected.type, error: { message: 'Ошибка входа' } };
+      const action = {
+        type: loginUser.rejected.type,
+        error: { message: 'Ошибка входа' }
+      };
       const actual = userReducer(initialState, action);
       expect(actual.isLoading).toBe(false);
       expect(actual.error).toBe('Ошибка входа');
@@ -87,7 +90,10 @@ describe('userSlice', () => {
     });
 
     it('должен устанавливать ошибку при rejected', () => {
-      const action = { type: registerUser.rejected.type, error: { message: 'Ошибка регистрации' } };
+      const action = {
+        type: registerUser.rejected.type,
+        error: { message: 'Ошибка регистрации' }
+      };
       const actual = userReducer(initialState, action);
       expect(actual.isLoading).toBe(false);
       expect(actual.error).toBe('Ошибка регистрации');

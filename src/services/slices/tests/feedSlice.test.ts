@@ -8,15 +8,17 @@ describe('feedSlice', () => {
     loading: false
   };
 
-  const mockOrders = [{
-    _id: 'order-1',
-    status: 'done',
-    name: 'Заказ 1',
-    createdAt: '2024-01-01',
-    updatedAt: '2024-01-01',
-    number: 1,
-    ingredients: ['ing-1']
-  }];
+  const mockOrders = [
+    {
+      _id: 'order-1',
+      status: 'done',
+      name: 'Заказ 1',
+      createdAt: '2024-01-01',
+      updatedAt: '2024-01-01',
+      number: 1,
+      ingredients: ['ing-1']
+    }
+  ];
 
   it('должен возвращать начальное состояние', () => {
     expect(feedReducer(undefined, { type: 'unknown' })).toEqual(initialState);
@@ -29,8 +31,8 @@ describe('feedSlice', () => {
   });
 
   it('должен сохранять данные при fulfilled', () => {
-    const action = { 
-      type: fetchFeeds.fulfilled.type, 
+    const action = {
+      type: fetchFeeds.fulfilled.type,
       payload: { orders: mockOrders, total: 100, totalToday: 10 }
     };
     const actual = feedReducer(initialState, action);

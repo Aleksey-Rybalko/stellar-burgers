@@ -12,7 +12,9 @@ describe('ingredientsSlice', () => {
   ];
 
   it('должен возвращать начальное состояние', () => {
-    expect(ingredientsReducer(undefined, { type: 'unknown' })).toEqual(initialState);
+    expect(ingredientsReducer(undefined, { type: 'unknown' })).toEqual(
+      initialState
+    );
   });
 
   it('должен устанавливать loading в true при pending', () => {
@@ -23,7 +25,10 @@ describe('ingredientsSlice', () => {
   });
 
   it('должен сохранять данные и устанавливать loading в false при fulfilled', () => {
-    const action = { type: fetchIngredients.fulfilled.type, payload: mockIngredients };
+    const action = {
+      type: fetchIngredients.fulfilled.type,
+      payload: mockIngredients
+    };
     const actual = ingredientsReducer(initialState, action);
     expect(actual.loading).toBe(false);
     expect(actual.ingredients).toEqual(mockIngredients);
